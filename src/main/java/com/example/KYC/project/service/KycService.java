@@ -1,5 +1,6 @@
 package com.example.KYC.project.service;
 
+import com.example.KYC.project.dto.KycDocumentResponse;
 import com.example.KYC.project.dto.KycRequest;
 import com.example.KYC.project.dto.KycResponse;
 import com.example.KYC.project.entity.Kyc;
@@ -266,9 +267,11 @@ public class KycService {
                     file.getOriginalFilename()
             );
 
-            document.setFilePath(
-                    target.toString()
-            );
+            document.setFilePath(uniqueFileName);
+
+//            document.setFilePath(
+//                    target.toString()
+//            );
 
             document.setUploadedAt(
                     LocalDateTime.now()
@@ -286,6 +289,51 @@ public class KycService {
                     "Failed to upload document"
             );
         }
+    }
+    // =========================
+    // GET DOCUMENT
+   // =========================
+
+    public KycDocument getDocument(Long documentId) {
+
+        return documentRepository
+                .findById(documentId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Document not found"
+                        )
+                );
+    }
+
+
+// =========================
+// GET DOCUMENT AS BYTE[]
+// =========================
+
+    public byte[] getDocumentBytes(Long documentId)
+            throws IOException {
+
+        KycDocument document =
+                getDocument(documentId);
+
+
+        Path path = Paths.get(uploadDir)
+                .resolve(document.getFilePath());
+
+
+//        Path path =
+//                Paths.get(
+//                        document.getFilePath()
+//                );
+
+        if (!Files.exists(path)) {
+
+            throw new ResourceNotFoundException(
+                    "File not found in folder"
+            );
+        }
+
+        return Files.readAllBytes(path);
     }
 
 
@@ -545,6 +593,49 @@ public class KycService {
 
         response.setRejectionReason(
                 kyc.getRejectionReason()
+        );
+
+        // Documents
+        List<KycDocument> documents =
+                documentRepository.findByKycId(
+                        kyc.getId()
+                );
+
+        List<KycDocumentResponse> documentResponses =
+                documents.stream()
+                        .map(document -> {
+
+                            KycDocumentResponse docResponse =
+                                    new KycDocumentResponse();
+
+                            docResponse.setId(
+                                    document.getId()
+                            );
+
+                            docResponse.setDocumentType(
+                                    document.getDocumentType()
+                            );
+
+                            docResponse.setFileName(
+                                    document.getFileName()
+                            );
+
+                            docResponse.setDocumentUrl(
+                                    "/api/kyc/documents/"
+                                            + document.getId()
+                            );
+
+                            docResponse.setUploadedAt(
+                                    document.getUploadedAt()
+                            );
+
+                            return docResponse;
+
+                        })
+                        .toList();
+
+        response.setDocuments(
+                documentResponses
         );
 
         return response;
