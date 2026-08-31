@@ -84,19 +84,32 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers("/api/auth/**")
-                        .permitAll()
+                                .requestMatchers("/api/auth/**")
+                                .permitAll()
 
-                        .requestMatchers("/api/admin/**")
-                        .hasRole("ADMIN")
+                                .requestMatchers("/api/admin/**")
+                                .hasRole("ADMIN")
 
-                        // Image / PDF dekhne ke liye token nahi
-                        .requestMatchers("/api/kyc/documents/**")
-                        .permitAll()
+                                .requestMatchers("/{fileName:.+}")
+                                .permitAll()
 
-                        // Baaki KYC APIs USER ke liye
-                        .requestMatchers("/api/kyc/**")
-                        .hasRole("USER")
+                                .requestMatchers("/api/kyc/**")
+                                .hasRole("USER")
+
+//                        .requestMatchers("/api/auth/**")
+//                        .permitAll()
+//
+//                        .requestMatchers("/api/admin/**")
+//                        .hasRole("ADMIN")
+//
+//                        // Image / PDF dekhne ke liye token nahi
+//                        .requestMatchers("/api/kyc/documents/**")
+//                        .permitAll()
+//
+//                        // Baaki KYC APIs USER ke liye
+
+//                        .requestMatchers("/api/kyc/**")
+//                        .hasRole("USER")
 
 //                        .requestMatchers(
 //                                "/api/auth/**"
